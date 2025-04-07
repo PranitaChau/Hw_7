@@ -1,0 +1,281 @@
+---
+title: "Hw7"
+author: "Pranita"
+date: '`r Sys.Date()`'
+output: pdf_document
+---
+
+## github
+# redo 1H
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+
+#importing files and loading data 
+library(tidyverse)
+library(ggplot2)
+library(mosaic)
+library(MatchIt)
+
+
+
+fold <- read_csv("armfold.csv")
+turnout <- read_csv("turnout.csv")
+
+```
+
+# Part 1
+## Part A
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+fold |>
+  group_by(Sex) |>
+  summarize(proportion = mean(LonR_fold), standard_deviation = sd(LonR_fold), num_rows = n())
+
+```
+There are 111 female students in the dataset and there are 106 male students in the dataset. The sample proportion of males who folder their left arm on top is 0.4716981 while the sample proportion of females who folded their left arm on top is 0.4234234.
+
+## Part B
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+diffprop(LonR_fold ~ Sex, data=fold)
+
+```
+
+The observed difference in proportions between the two groups (males minus females) is 0.04827469.
+
+## Part C
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# by computer 
+prop.test(LonR_fold ~ Sex, data=fold)
+
+
+# Calculate the standard error for the difference
+se <- sqrt((0.4963421^2 / 106) + (0.5015699^2 / 111))
+
+0.04827469 - 2*se
+0.04827469 + 1.97*se 
+
+```
+
+We can be 95% confident that the true difference in proportions between males and females who folded their left arm on top is between -0.09315879 and 0.18970817. Since this confidence interval includes zero it suggests that there is no statistical significance between male and female students who cross their arms with their left arm being on top. 
+The formula for standard error is sqrt((sd1^2 / n1) + (sd2^2 / n2)) with sd being standard deviation and n being the total amount of rows in that category (male or female). I used sd1 = 0.4963421, sd2 = 0.5015699, n1 = 106, n2 = 111. I used 2 for the z* value because I used a 95% confidence interval.
+
+
+## Part D
+If we were to ask a student to cross their hands and see if they put their left hand on top, then we would expect that the difference in proportions between males and females placing their left hand on top would be between -0.0932 and 0.1897, indicating no significant statistical difference.
+
+
+## Part E
+The standard error is the variability between the proportions of the two groups and how off they are to the actual difference. It is measuring the difference between observed proportion of male and female students who folded their left arm on top compared to the reality of the true proportion when using different samples.
+
+## Part F
+Sampling distribution is the distribution of differences in the proportions in males vs. females folding their left arm on top across different samples. In each sample the thing that would change is the difference in proportion since the proportions will change, but the real true proportion of males and females that fold their left arm on top will stay the same. 
+
+## Part G
+The Law of Large numbers shows that using a normal distribution is ok since the sample sizes are large so that the overall result will not be affected based on the skew or distribution of the original sample. Since our sample size of both male and female students is big enough we can use normal distribution to approximate proportion differences.
+
+## Part H
+I would say that due to a 95% confidence interval being used we cannot say for certain if there is no sex difference in arm folding. Additionally, I would say that based on this exact sample no there is no difference since zero is included in the interval, but if this is replicated there is a chance that zero will not be included in the interval since -.01 is so close to zero that based on the new sample proportions may cause the lower bound to be 0.02 to 0.30 or any other number above zero. Therefore I would say that there not enough evidence to say that there is support a claim of a sex difference in arm folding.
+
+## Part I
+Yes the confidence interval would be slightly difference across all samples. This is due to resampling and the fact that there may be more people that favor their right hand, or more that favor their left. However, over many many trials of this sample being taken we can be 95% confident that around 95% of the confidence intervals will include the true population difference in proportions. 
+
+
+
+# Part 2
+## Part A
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+#table with proportions
+turnout |>
+  group_by(GOTV_call) |>
+  summarize(proportion = mean(voted1998), standard_deviation = sd(voted1998), num_rows = n())
+
+
+#95% confidence interval
+
+new <- turnout |> 
+  group_by(GOTV_call) |> 
+  summarize(voted = sum(voted1998 == "1"),  
+    total = n()  
+  )
+
+
+prop.test(new$voted, new$total)
+
+
+
+```
+The proportion of those receiving a GOTV call who voted in 1998 is 0.6477733 and the proportion of those not receiving a GOTV call who voted in 1998 is 0.4442449. We can be 95% confident that there is a -0.2659167 to -0.1411399 difference in the proportion of voters for those who did not receive a GOTV call compared to those who did. 
+
+## Part B
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# is voted1996 a confounder
+
+# govt call vs voted1996
+turnout |>
+  group_by(GOTV_call) |>
+  summarize(proportion = mean(voted1996), standard_deviation = sd(voted1996), num_rows = n())
+
+#95% confidence interval
+
+govt_1996 <- turnout |> 
+  group_by(GOTV_call) |> 
+  summarize(voted = sum(voted1996 == "1"),  
+    total = n()  
+  )
+prop.test(new_1996$voted, new_1996$total)
+
+
+# relationship between voted 1996 and voted 1998
+
+#table 
+turnout |>
+  group_by(voted1996) |>
+  summarize(proportion = mean(voted1998), standard_deviation = sd(voted1998), num_rows = n())
+
+#95% confidence interval
+
+both_years <- turnout |> 
+  group_by(voted1996) |> 
+  summarize(voted = sum(voted1998 == "1"),  
+    total = n()  
+  )
+prop.test(both_years$voted, both_years$total)
+
+```
+
+
+The variable voted1996 is a confounder as based on the 95% confidence interval we can say that we are 95% confident that there is a -0.2410506 to -0.1224366 difference between 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# is AGE a confounder
+
+#table 
+turnout |>
+  group_by(GOTV_call) |>
+  summarize(proportion = mean(AGE), standard_deviation = sd(AGE), num_rows = n())
+
+#95% confidence interval
+
+govt_1996 <- turnout |> 
+  group_by(GOTV_call) |> 
+  summarize(voted = sum(AGE == "1"),  
+    total = n()  
+  )
+t.test(AGE ~ GOTV_call, data = turnout)
+
+
+# relationship between age and voted 1998
+
+#graph 
+
+#95% confidence interval
+
+t.test(AGE ~ voted1998, data = turnout)
+
+
+
+```
+
+
+yes !
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# is MAJORPTY a confounder
+
+#table 
+turnout |>
+  group_by(GOTV_call) |>
+  summarize(proportion = mean(MAJORPTY), standard_deviation = sd(MAJORPTY), num_rows = n())
+
+#95% confidence interval
+
+govt_party <- turnout |> 
+  group_by(GOTV_call) |> 
+  summarize(voted = sum(MAJORPTY == "1"),  
+    total = n()  
+  )
+prop.test(govt_party$voted, govt_party$total)
+
+
+# relationship between MAJORPTY and voted 1998
+
+#table 
+turnout |>
+  group_by(MAJORPTY) |>
+  summarize(proportion = mean(voted1998), standard_deviation = sd(voted1998), num_rows = n())
+
+#95% confidence interval
+
+party_vote <- turnout |> 
+  group_by(MAJORPTY) |> 
+  summarize(voted = sum(voted1998 == "1"),  
+    total = n()  
+  )
+prop.test(party_vote$voted, party_vote$total)
+
+
+
+```
+yes!
+
+
+
+## Part C
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+turnout_match = matchit(GOTV_call ~ AGE + MAJORPTY + voted1996, data = turnout, ratio=5)
+
+
+summary(turnout_match)
+
+# extract the matched data and analyze
+turnout_matched = match.data(turnout_match)
+
+prop(voted1998 ~ GOTV_call, data=turnout_matched)
+prop.test(voted1998 ~ GOTV_call, data=turnout_matched)
+
+
+# get confidence intervals 
+#table with proportions
+turnout |>
+  group_by(GOTV_call) |>
+  summarize(proportion = mean(voted1998), standard_deviation = sd(voted1998), num_rows = n())
+
+
+#95% confidence interval
+
+new <- turnout |> 
+  group_by(GOTV_call) |> 
+  summarize(voted = sum(voted1998 == "1"),  
+    total = n()  
+  )
+
+
+prop.test(new$voted, new$total)
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
