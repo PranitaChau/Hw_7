@@ -5,8 +5,9 @@ date: '`r Sys.Date()`'
 output: pdf_document
 ---
 
-## github
-# redo 1H
+# Name: Pranita Chaudhury
+# UT EID: pc28377
+# github: https://github.com/PranitaChau/Hw_7
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -30,7 +31,7 @@ turnout <- read_csv("turnout.csv")
 
 fold |>
   group_by(Sex) |>
-  summarize(proportion = mean(LonR_fold), standard_deviation = sd(LonR_fold), num_rows = n())
+  summarize(proportion = mean(LonR_fold == "1"), standard_deviation = sd(LonR_fold == "1"), num_rows = n())
 
 ```
 There are 111 female students in the dataset and there are 106 male students in the dataset. The sample proportion of males who folder their left arm on top is 0.4716981 while the sample proportion of females who folded their left arm on top is 0.4234234.
@@ -58,6 +59,7 @@ se <- sqrt((0.4963421^2 / 106) + (0.5015699^2 / 111))
 0.04827469 - 2*se
 0.04827469 + 1.97*se 
 
+
 ```
 
 We can be 95% confident that the true difference in proportions between males and females who folded their left arm on top is between -0.09315879 and 0.18970817. Since this confidence interval includes zero it suggests that there is no statistical significance between male and female students who cross their arms with their left arm being on top. 
@@ -65,23 +67,24 @@ The formula for standard error is sqrt((sd1^2 / n1) + (sd2^2 / n2)) with sd bein
 
 
 ## Part D
-If we were to ask a student to cross their hands and see if they put their left hand on top, then we would expect that the difference in proportions between males and females placing their left hand on top would be between -0.0932 and 0.1897, indicating no significant statistical difference.
+If we were to take many samples from this class where we asked a student to cross their hands and see if they put their left hand on top, then we would expect that 95% of the time the difference in proportions between males and females placing their left hand on top would be between -0.0932 and 0.1897, indicating no significant statistical difference.
 
 
 ## Part E
-The standard error is the variability between the proportions of the two groups and how off they are to the actual difference. It is measuring the difference between observed proportion of male and female students who folded their left arm on top compared to the reality of the true proportion when using different samples.
+The standard error is the variability of the sampling distribution. It tells us the variability between the proportions of the two groups and how off they are to the actual difference. It is measuring the difference between observed standard deviation of male and female students who folded their left arm on top compared to the reality of the true proportion when using different samples, and in this clas is 0.0052278 (male sd - female sd).
 
 ## Part F
-Sampling distribution is the distribution of differences in the proportions in males vs. females folding their left arm on top across different samples. In each sample the thing that would change is the difference in proportion since the proportions will change, but the real true proportion of males and females that fold their left arm on top will stay the same. 
+Sampling distribution is the distribution of differences in the proportions in males vs. females folding their left arm on top across different samples. In each sample the thing that would change is the difference in proportion since the proportions will change, but the sampling procedure will stay the same. 
 
 ## Part G
-The Law of Large numbers shows that using a normal distribution is ok since the sample sizes are large so that the overall result will not be affected based on the skew or distribution of the original sample. Since our sample size of both male and female students is big enough we can use normal distribution to approximate proportion differences.
+The central limit theorem shows that using a normal distribution is ok since the sample sizes are large so that the overall result will not be affected based on the skew or distribution of the original sample because the sampling distributions that are based on averages of large sample sizes which are independent. Since our sample size of both male and female students is big enough we can use normal distribution to approximate proportion differences.
 
 ## Part H
-I would say that due to a 95% confidence interval being used we cannot say for certain if there is no sex difference in arm folding. Additionally, I would say that based on this exact sample no there is no difference since zero is included in the interval, but if this is replicated there is a chance that zero will not be included in the interval since -.01 is so close to zero that based on the new sample proportions may cause the lower bound to be 0.02 to 0.30 or any other number above zero. Therefore I would say that there not enough evidence to say that there is support a claim of a sex difference in arm folding.
+Looking at the 95% confidence interval for the difference in proportions, which is -0.01 to 0.30, we cannot say for sure that there’s no difference between males and females in arm folding. The fact that the interval includes 0 means it’s possible there’s no difference at all, but it also goes up to 0.30, which suggests that it could be more likely for females to fold their left arm on top. So, even though we can’t completely rule out the idea of no difference, we also don’t have enough evidence to say there’s definitely a difference either.
+
 
 ## Part I
-Yes the confidence interval would be slightly difference across all samples. This is due to resampling and the fact that there may be more people that favor their right hand, or more that favor their left. However, over many many trials of this sample being taken we can be 95% confident that around 95% of the confidence intervals will include the true population difference in proportions. 
+Yes the confidence interval would be slightly difference across all samples. This is due to resampling and the fact that there may be more people of one sex who prefer their left arm. There will be slight changes based on chance. However, over many many trials of this sample being taken we can be 95% confident that around 95% of the confidence intervals will include the true population difference in proportions. 
 
 
 
@@ -129,7 +132,7 @@ govt_1996 <- turnout |>
   summarize(voted = sum(voted1996 == "1"),  
     total = n()  
   )
-prop.test(new_1996$voted, new_1996$total)
+prop.test(govt_1996$voted, govt_1996$total)
 
 
 # relationship between voted 1996 and voted 1998
@@ -151,42 +154,37 @@ prop.test(both_years$voted, both_years$total)
 ```
 
 
-The variable voted1996 is a confounder as based on the 95% confidence interval we can say that we are 95% confident that there is a -0.2410506 to -0.1224366 difference between 
+We can conclude that the variable voted1996 is a confounder because when we compare it to GOTV_call and voted1998, the confidence interval for the difference is between -0.2410506 to -0.1224366 for GOTV_call, and -0.4275349 to -0.3932429 for voted1998. Since the interval does not include zero this suggests a significant correlation, indicating that voted1996 (if the person voted in 1996) is a confounder variable between whether the person recieved a GOTV call and if they voted in 1998.. 
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-# is AGE a confounder
+#is AGE a confounder (using 30 yrs as a benchmark)
+turnout$age_group <- ifelse(turnout$AGE > 30, "Over 30", "30 or Under")
 
-#table 
-turnout |>
-  group_by(GOTV_call) |>
-  summarize(proportion = mean(AGE), standard_deviation = sd(AGE), num_rows = n())
+govt_voted1998_age <- turnout |>
+  group_by(age_group, GOTV_call) |>
+  summarize(proportion_voted1998 = mean(voted1998 == 1), num_rows = n())
 
-#95% confidence interval
-
-govt_1996 <- turnout |> 
-  group_by(GOTV_call) |> 
-  summarize(voted = sum(AGE == "1"),  
-    total = n()  
+prop.test(
+  x = govt_voted1998_age$proportion_voted1998 * govt_voted1998_age$num_rows,  # votes
+  n = govt_voted1998_age$num_rows  # total per group
+)
+#  95% confidence intervals
+govt_voted1998_age <- govt_voted1998_age |>
+  mutate(
+    ci_lower = proportion_voted1998 - 1.96 * sqrt((proportion_voted1998 * (1 - proportion_voted1998)) / num_rows),
+    ci_upper = proportion_voted1998 + 1.96 * sqrt((proportion_voted1998 * (1 - proportion_voted1998)) / num_rows)
   )
-t.test(AGE ~ GOTV_call, data = turnout)
 
-
-# relationship between age and voted 1998
-
-#graph 
-
-#95% confidence interval
-
-t.test(AGE ~ voted1998, data = turnout)
-
+govt_voted1998_age
 
 
 ```
 
 
-yes !
+We can conclude that AGE is a confounder because when we compare it to GOTV_call and voted1998, the confidence interval for the difference is between 0.1702043	to 0.2055275 for those 30 or under who did not get a GOTV call, the difference for those 30 or under who did get a GOTV call is 0.3300468 to 0.7069902. The difference for those over 30 who did not get a GOTV call is 0.4890930	to 0.5101027, and for those over 30 who did get a GOTV call the difference is 0.6012033 to	0.7260694. Since none of the intervals include zero this suggests a correlation, indicating that AGE is a confounder variable between whether the person recieved a GOTV call and if they voted in 1998..
 
+ 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 # is MAJORPTY a confounder
@@ -225,54 +223,53 @@ prop.test(party_vote$voted, party_vote$total)
 
 
 ```
-yes!
+We can conclude that MAJORPTY is a confounder because when we compare it to GOTV_call and voted1998, the confidence interval for the difference is between -0.109356458 to -0.004371919 for GOTV_call, and -0.1534422 to -0.1111651 for voted1998. Since the interval does not include zero this suggests a significant correlation, indicating that MAJORPTY is a confounder variable between whether the person recieved a GOTV call and if they voted in 1998.. 
 
+
+
+Therefore we can conclude that the voted1996, AGE, and MAJORPTY variables are all confounder variables since none of the confidence intervals of those variables compared to the GOTV_call and voted1998 variables included zero in their interval. 
 
 
 ## Part C
+
+
+
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
-turnout_match = matchit(GOTV_call ~ AGE + MAJORPTY + voted1996, data = turnout, ratio=5)
+# perform matched test
+matched_model <- matchit(GOTV_call ~ voted1996 + AGE + MAJORPTY,
+                   data = turnout,
+                   ratio = 5)
+
+summary(matched_model)
+
+# Extracting matched pairs
+matched_data <- match.data(matched_model)
+matched_data
+
+prop_treated <- mean(matched_data$voted1998[matched_data$GOTV_call == 1])
+prop_treated
+
+prop_control <- mean(matched_data$voted1998[matched_data$GOTV_call == 0])
+prop_control
 
 
-summary(turnout_match)
-
-# extract the matched data and analyze
-turnout_matched = match.data(turnout_match)
-
-prop(voted1998 ~ GOTV_call, data=turnout_matched)
-prop.test(voted1998 ~ GOTV_call, data=turnout_matched)
-
-
-# get confidence intervals 
-#table with proportions
-turnout |>
-  group_by(GOTV_call) |>
-  summarize(proportion = mean(voted1998), standard_deviation = sd(voted1998), num_rows = n())
-
-
-#95% confidence interval
-
-new <- turnout |> 
-  group_by(GOTV_call) |> 
-  summarize(voted = sum(voted1998 == "1"),  
-    total = n()  
-  )
-
-
-prop.test(new$voted, new$total)
-
-
-
+#  difference in proportions
+prop_test_result <- prop.test(
+  x = c(sum(matched_data$voted1998[matched_data$GOTV_call == 1]), 
+        sum(matched_data$voted1998[matched_data$GOTV_call == 0])), 
+  n = c(sum(matched_data$GOTV_call == 1), sum(matched_data$GOTV_call == 0))
+)
+prop_test_result
 
 
 ```
 
 
+The proportion of people that got a GOVT call and voted in 1998 is 0.6477733, while the proportion of people that did not get a GOVT call and voted in 1998 is 0.5692308. 
 
 
-
-
+We can be 95% confident that the true difference in proportions between those who got a GOVT call and voted in 1998 compared to those who did not receive a GOVT call and voted in 1998 in between 0.01045353 and 0.14663149. This shows that getting a GOTV call has a statistically significant effect on the likelihood of voting in 1998 since the voted1996, AGE, and MAJORPTY are no longer confounders and the interval does not include zero.
 
 
 
